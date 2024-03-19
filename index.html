@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Is It James? - Image Recognition</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .title {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .video-box {
+            position: relative;
+            display: inline-block;
+        }
+        .label {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="title">Teachable Machine Image Model -- Is it James?</div>
+    <div class="video-box">
+        <canvas id="canvas"></canvas>
+        <div class="label" id="label">Loading...</div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/p5@latest/lib/p5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/p5@latest/lib/addons/p5.dom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ml5@latest/dist/ml5.min.js"></script>
+<script type="text/javascript">
+  let classifier;
+  let imageModelURL = './my_model/';
+  
+  let video;
+  let flippedVideo;
+  let label = "";
+
+  function preload() {
+    classifier = ml5.imageClassifier(imageModelURL + 'model.json');
+  }
+
+  function setup() {
+    let canvas = createCanvas(320, 260);
+    canvas.parent('canvas');
+    
+    video = createCapture(VIDEO);
+    video.size(320, 240);
+    video.hide();
+
+    flippedVideo = ml5.flipImage(video);
+    classifyVideo();
+  }
+
+  function draw() {
+    background(0);
+    image(flippedVideo, 0, 0);
+    fill(255);
+    noStroke();
+    textSize(16);
+    textAlign(CENTER);
+  }
+
+  function classifyVideo() {
+    flippedVideo = ml5.flipImage(video)
+    classifier.classify(flippedVideo, gotResult);
+    flippedVideo.remove();
+  }
+
+  function gotResult(error, results) {
+    if (error) {
+      console.error(error);
+      return;
+    }
+    label = results[0].label;
+    document.getElementById('label').innerText = label;
+    classifyVideo();
+  }
+</script>
+</body>
+</html>
